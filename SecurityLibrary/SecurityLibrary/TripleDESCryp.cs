@@ -116,6 +116,7 @@ namespace YuWan
                 };
                 return des.CreateDecryptor().TransformFinalBlock(encrypted, 0, encrypted.Length);
             }
+            #endregion
         }
     }
 }
