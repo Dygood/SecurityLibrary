@@ -3,14 +3,8 @@ using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 
-/// <summary>
-/// So魚丸丷
-/// </summary>
 namespace YuWan
 {
-    /// <summary>
-    /// 加密解密类库
-    /// </summary>
     namespace SecurityLibrary
     {
         /**
@@ -32,6 +26,7 @@ namespace YuWan
         public class RSACryp
         {
             #region RSA 的密钥产生 
+
             /// <summary>
             /// RSA 的密钥产生 产生私钥和公钥
             /// </summary>
@@ -39,20 +34,23 @@ namespace YuWan
             /// <param name="XmlPublicKey">当前RSA对象的密匙XML字符串(不包括专用参数)--公钥</param>
             public static void RSAKey(out string XmlPrivateKey, out string XmlPublicKey)
             {
-                RSACryptoServiceProvider rsa = new RSACryptoServiceProvider();
+                var rsa = new RSACryptoServiceProvider();
                 XmlPrivateKey = rsa.ToXmlString(true);
                 XmlPublicKey = rsa.ToXmlString(false);
             }
+
             #endregion
 
             #region RSA的加密函数 
+
             /// <summary>
             /// 使用RSA的加密String(该方法存在长度限制)
             /// </summary>
             /// <param name="XmlPublicKey">当前RSA对象的密匙XML字符串(不包括专用参数)--公钥</param>
             /// <param name="Plaintext">需要进行加密的字符串</param>
             /// <returns>加密后的字符串</returns>
-            public static string RSAEncrypt(string XmlPublicKey, string Plaintext) => Convert.ToBase64String(RSAEncrypt(XmlPublicKey, new UnicodeEncoding().GetBytes(Plaintext)));
+            public static string RSAEncrypt(string XmlPublicKey, string Plaintext) =>
+                Convert.ToBase64String(RSAEncrypt(XmlPublicKey, new UnicodeEncoding().GetBytes(Plaintext)));
 
             /// <summary>
             /// 使用RSA的加密byte[](该方法存在长度限制)
@@ -62,20 +60,23 @@ namespace YuWan
             /// <returns>加密后的字节数组</returns>
             public static byte[] RSAEncrypt(string XmlPublicKey, byte[] Plaintext)
             {
-                RSACryptoServiceProvider rsa = new RSACryptoServiceProvider();
+                var rsa = new RSACryptoServiceProvider();
                 rsa.FromXmlString(XmlPublicKey);
                 return rsa.Encrypt(Plaintext, false);
             }
+
             #endregion
 
             #region RSA的解密函数 
+
             /// <summary>
             /// RSA解密String(该方法存在长度限制)
             /// </summary>
             /// <param name="XmlPrivateKey">当前RSA对象的密匙XML字符串(包括专用参数)--私钥</param>
             /// <param name="Ciphertext">需要进行解密的字符串</param>
             /// <returns>解密后的字符串</returns>
-            public static string RSADecrypt(string XmlPrivateKey, string Ciphertext) => new UnicodeEncoding().GetString(RSADecrypt(XmlPrivateKey, Convert.FromBase64String(Ciphertext)));
+            public static string RSADecrypt(string XmlPrivateKey, string Ciphertext) =>
+                new UnicodeEncoding().GetString(RSADecrypt(XmlPrivateKey, Convert.FromBase64String(Ciphertext)));
 
             /// <summary>
             /// RSA解密byte[](该方法存在长度限制)
@@ -85,17 +86,20 @@ namespace YuWan
             /// <returns>解密后的字节数组</returns>
             public static byte[] RSADecrypt(string XmlPrivateKey, byte[] Ciphertext)
             {
-                RSACryptoServiceProvider rsa = new RSACryptoServiceProvider();
+                var rsa = new RSACryptoServiceProvider();
                 rsa.FromXmlString(XmlPrivateKey);
                 return rsa.Decrypt(Ciphertext, false);
             }
+
             #endregion
 
             #region 获取Hash描述表 
+
             /// <summary>
             /// 从字符串中取得Hash描述字节数组
             /// </summary>
             /// <param name="source">源字符串</param>
+            /// <exception cref="ArgumentException"></exception>
             /// <returns>Hash字节数组</returns>
             public static byte[] GetHashByte(string source)
             {
@@ -115,14 +119,13 @@ namespace YuWan
             /// 从文件中取得Hash描述字节数组
             /// </summary>
             /// <param name="objFile">文件流</param>
+            /// <exception cref="ArgumentNullException"></exception>
             /// <returns>Hash字节数组</returns>
             public static byte[] GetFileHashByte(FileStream objFile)
             {
                 if (objFile == null)
-                {
                     throw new ArgumentNullException(nameof(objFile));
-                }
-                byte[] arry = HashAlgorithm.Create("MD5").ComputeHash(objFile);
+                var arry = HashAlgorithm.Create("MD5").ComputeHash(objFile);
                 objFile.Close();
                 return arry;
             }
@@ -131,12 +134,14 @@ namespace YuWan
             /// 从文件中取得Hash描述字符串
             /// </summary>
             /// <param name="objFile"></param>
-            /// <param name="strHashData"></param>
             /// <returns></returns>
-            public static string GetFileHashString(FileStream objFile) => Convert.ToBase64String(GetFileHashByte(objFile));
+            public static string GetFileHashString(FileStream objFile) =>
+                Convert.ToBase64String(GetFileHashByte(objFile));
+
             #endregion
 
             #region RSA签名
+
             /// <summary>
             /// RSA签名
             /// </summary>
@@ -145,9 +150,9 @@ namespace YuWan
             /// <param name="EncryptedSignatureByte">签名后的字节数组数据</param>
             public static void SignatureFormatter(string XmlPrivateKey, byte[] HashbyteSignature, ref byte[] EncryptedSignatureByte)
             {
-                RSACryptoServiceProvider RSA = new RSACryptoServiceProvider();
+                var RSA = new RSACryptoServiceProvider();
                 RSA.FromXmlString(XmlPrivateKey);
-                RSAPKCS1SignatureFormatter RSAFormatter = new RSAPKCS1SignatureFormatter(RSA);
+                var RSAFormatter = new RSAPKCS1SignatureFormatter(RSA);
                 //设置签名的算法为MD5 
                 RSAFormatter.SetHashAlgorithm("MD5");
                 //执行签名 
@@ -174,11 +179,8 @@ namespace YuWan
             /// <param name="HashStringSignature">需要签名的字符串</param>
             /// <param name="EncryptedSignatureByte">签名后的字节数组数据</param>
             /// <returns></returns>
-            public static void SignatureFormatter(string XmlPrivateKey, string HashStringSignature, ref byte[] EncryptedSignatureByte)
-            {
-                byte[] HashbyteSignature = Convert.FromBase64String(HashStringSignature);
-                SignatureFormatter(XmlPrivateKey, HashbyteSignature, ref EncryptedSignatureByte);
-            }
+            public static void SignatureFormatter(string XmlPrivateKey, string HashStringSignature, ref byte[] EncryptedSignatureByte) =>
+                SignatureFormatter(XmlPrivateKey, Convert.FromBase64String(HashStringSignature), ref EncryptedSignatureByte);
 
             /// <summary>
             /// RSA签名
@@ -186,14 +188,13 @@ namespace YuWan
             /// <param name="XmlPrivateKey">当前RSA对象的密匙XML字符串(包括专用参数)--私钥</param>
             /// <param name="HashStringSignature">需要签名的字符串</param>
             /// <param name="EncryptedSignatureString">签名后字符串</param>
-            public static void SignatureFormatter(string XmlPrivateKey, string HashStringSignature, ref string EncryptedSignatureString)
-            {
-                byte[] HashbyteSignature = Convert.FromBase64String(HashStringSignature);
-                SignatureFormatter(XmlPrivateKey, HashbyteSignature, ref EncryptedSignatureString);
-            }
+            public static void SignatureFormatter(string XmlPrivateKey, string HashStringSignature, ref string EncryptedSignatureString) =>
+                SignatureFormatter(XmlPrivateKey, Convert.FromBase64String(HashStringSignature), ref EncryptedSignatureString);
+
             #endregion
 
             #region RSA 签名验证 
+
             /// <summary>
             /// RSA 签名验证 
             /// </summary>
@@ -203,15 +204,12 @@ namespace YuWan
             /// <returns> 如果 HashByteVerification 与使用指定的哈希算法和密钥在 SignatureByte 上计算出的签名匹配,则为 true;否则为 false.</returns>
             public static bool SignatureVerification(string XmlPublicKey, byte[] HashByteVerification, byte[] SignatureByte)
             {
-                RSACryptoServiceProvider RSA = new RSACryptoServiceProvider();
+                var RSA = new RSACryptoServiceProvider();
                 RSA.FromXmlString(XmlPublicKey);
-                RSAPKCS1SignatureDeformatter RSADeformatter = new RSAPKCS1SignatureDeformatter(RSA);
+                var RSADeformatter = new RSAPKCS1SignatureDeformatter(RSA);
                 //指定解密的时候HASH算法为MD5 
                 RSADeformatter.SetHashAlgorithm("MD5");
-                if (RSADeformatter.VerifySignature(HashByteVerification, SignatureByte))
-                    return true;
-                else
-                    return false;
+                return RSADeformatter.VerifySignature(HashByteVerification, SignatureByte);
             }
 
             /// <summary>
@@ -221,11 +219,8 @@ namespace YuWan
             /// <param name="HashStringVerification">用RSA签名的字符串数据</param>
             /// <param name="SignatureByte">要为该数据验证的签名字节数组</param>
             /// <returns>如果 HashStringVerification 与使用指定的哈希算法和密钥在 SignatureByte 上计算出的签名匹配,则为 true;否则为 false.</returns>
-            public static bool SignatureVerification(string XmlPublicKey, string HashStringVerification, byte[] SignatureByte)
-            {
-                byte[] HashByteVerification = Convert.FromBase64String(HashStringVerification);
-                return SignatureVerification(XmlPublicKey, HashByteVerification, SignatureByte);
-            }
+            public static bool SignatureVerification(string XmlPublicKey, string HashStringVerification, byte[] SignatureByte) =>
+                SignatureVerification(XmlPublicKey, Convert.FromBase64String(HashStringVerification), SignatureByte);
 
             /// <summary>
             /// RSA 签名验证
@@ -234,11 +229,8 @@ namespace YuWan
             /// <param name="HashByteVerification">用RSA签名的字节数组数据</param>
             /// <param name="SignatureString">要为该数据验证的签名字符串</param>
             /// <returns>如果 HashByteVerification 与使用指定的哈希算法和密钥在 SignatureString 上计算出的签名匹配,则为 true;否则为 false.</returns>
-            public static bool SignatureVerification(string XmlPublicKey, byte[] HashByteVerification, string SignatureString)
-            {
-                byte[] SignatureByte = Convert.FromBase64String(SignatureString);
-                return SignatureVerification(XmlPublicKey, HashByteVerification, SignatureByte);
-            }
+            public static bool SignatureVerification(string XmlPublicKey, byte[] HashByteVerification, string SignatureString) =>
+                SignatureVerification(XmlPublicKey, HashByteVerification, Convert.FromBase64String(SignatureString));
 
             /// <summary>
             /// RSA 签名验证
@@ -247,14 +239,13 @@ namespace YuWan
             /// <param name="HashStringVerification">用RSA签名的字符串数据</param>
             /// <param name="SignatureString">要为该数据验证的签名字符串</param>
             /// <returns>如果 HashStringVerification 与使用指定的哈希算法和密钥在 SignatureString 上计算出的签名匹配,则为 true;否则为 false.</returns>
-            public static bool SignatureVerification(string XmlPublicKey, string HashStringVerification, string SignatureString)
-            {
-                byte[] SignatureByte = Convert.FromBase64String(SignatureString);
-                return SignatureVerification(XmlPublicKey, HashStringVerification, SignatureByte);
-            }
+            public static bool SignatureVerification(string XmlPublicKey, string HashStringVerification, string SignatureString) => 
+                SignatureVerification(XmlPublicKey, HashStringVerification, Convert.FromBase64String(SignatureString));
+
             #endregion
 
             #region 不限长度
+
             /// <summary>
             /// RSA加密 不限长度的加密版本
             /// </summary>
@@ -269,23 +260,24 @@ namespace YuWan
                     throw new ArgumentException("错误的公匙");
                 using (var rsaProvider = new RSACryptoServiceProvider())
                 {
-                    byte[] inputBytes = Convert.FromBase64String(Plaintext);//有含义的字符串转化为字节流
-                    rsaProvider.FromXmlString(XmlPublicKey);//载入公钥
-                    int bufferSize = (rsaProvider.KeySize / 8) - 11;//单块最大长度
-                    byte[] buffer = new byte[bufferSize];
+                    var inputBytes = Convert.FromBase64String(Plaintext); //有含义的字符串转化为字节流
+                    rsaProvider.FromXmlString(XmlPublicKey); //载入公钥
+                    var bufferSize = (rsaProvider.KeySize / 8) - 11; //单块最大长度
+                    var buffer = new byte[bufferSize];
                     using (MemoryStream inputStream = new MemoryStream(inputBytes), outputStream = new MemoryStream())
                     {
                         while (true)
-                        { //分段加密
-                            int readSize = inputStream.Read(buffer, 0, bufferSize);
+                        {
+                            //分段加密
+                            var readSize = inputStream.Read(buffer, 0, bufferSize);
                             if (readSize <= 0)
                                 break;
-                            byte[] temp = new byte[readSize];
+                            var temp = new byte[readSize];
                             Array.Copy(buffer, 0, temp, 0, readSize);
-                            byte[] encryptedBytes = rsaProvider.Encrypt(temp, false);
+                            var encryptedBytes = rsaProvider.Encrypt(temp, false);
                             outputStream.Write(encryptedBytes, 0, encryptedBytes.Length);
                         }
-                        Ciphertext = Convert.ToBase64String(outputStream.ToArray());//转化为字节流方便传输
+                        Ciphertext = Convert.ToBase64String(outputStream.ToArray()); //转化为字节流方便传输
                     }
                 }
             }
@@ -304,18 +296,18 @@ namespace YuWan
                     throw new ArgumentException("错误的私匙");
                 using (var rsaProvider = new RSACryptoServiceProvider())
                 {
-                    byte[] inputBytes = Convert.FromBase64String(Ciphertext);
+                    var inputBytes = Convert.FromBase64String(Ciphertext);
                     rsaProvider.FromXmlString(XmlPrivateKey);
-                    int bufferSize = rsaProvider.KeySize / 8;
-                    byte[] buffer = new byte[bufferSize];
+                    var bufferSize = rsaProvider.KeySize / 8;
+                    var buffer = new byte[bufferSize];
                     using (MemoryStream inputStream = new MemoryStream(inputBytes), outputStream = new MemoryStream())
                     {
                         while (true)
                         {
-                            int readSize = inputStream.Read(buffer, 0, bufferSize);
+                            var readSize = inputStream.Read(buffer, 0, bufferSize);
                             if (readSize <= 0)
                                 break;
-                            byte[] temp = new byte[readSize];
+                            var temp = new byte[readSize];
                             Array.Copy(buffer, 0, temp, 0, readSize);
                             var rawBytes = rsaProvider.Decrypt(temp, false);
                             outputStream.Write(rawBytes, 0, rawBytes.Length);
@@ -324,6 +316,7 @@ namespace YuWan
                     }
                 }
             }
+
             #endregion
         }
     }

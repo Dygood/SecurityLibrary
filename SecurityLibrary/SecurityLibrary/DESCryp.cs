@@ -1,16 +1,11 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 
-/// <summary>
-/// So魚丸丷
-/// </summary>
 namespace YuWan
 {
-    /// <summary>
-    /// 加密解密类库
-    /// </summary>
     namespace SecurityLibrary
     {
         /// <summary>
@@ -19,6 +14,7 @@ namespace YuWan
         public static class DESCryp
         {
             #region 加密
+
             /// <summary>
             /// 使用默认密码(MiracleSoft)加密字符串
             /// </summary>
@@ -34,60 +30,69 @@ namespace YuWan
             /// <returns>密文字符串</returns> 
             public static string Encrypt(string str, string key)
             {
-                DESCryptoServiceProvider des = new DESCryptoServiceProvider
+                var des = new DESCryptoServiceProvider
                 {
                     Key = Encoding.ASCII.GetBytes(GetMD5(key)),
                     IV = Encoding.ASCII.GetBytes(GetMD5(key))
                 };
-                byte[] inputByteArray = Encoding.Default.GetBytes(str);
-                MemoryStream ms = new MemoryStream();
-                CryptoStream cs = new CryptoStream(ms, des.CreateEncryptor(), CryptoStreamMode.Write);
-                cs.Write(inputByteArray, 0, inputByteArray.Length);
-                cs.FlushFinalBlock();
-                StringBuilder ret = new StringBuilder();
-                foreach (byte b in ms.ToArray())
+                var inputByteArray = Encoding.Default.GetBytes(str);
+                using (var ms = new MemoryStream())
                 {
-                    ret.AppendFormat("{0:X2}", b);
+                    using (var cs = new CryptoStream(ms, des.CreateEncryptor(), CryptoStreamMode.Write))
+                    {
+                        cs.Write(inputByteArray, 0, inputByteArray.Length);
+                        cs.FlushFinalBlock();
+                        var ret = new StringBuilder();
+                        foreach (var b in ms.ToArray())
+                            ret.AppendFormat($"{b:X2}");
+                        return ret.ToString();
+                    }
                 }
-                return ret.ToString();
             }
+
             #endregion
 
             #region 解密
+
             /// <summary>
             /// 使用默认密码(MiracleSoft)解密字符串
             /// </summary>
             /// <param name="str">密文字符串</param>
             /// <returns>明文</returns>
             public static string Decrypt(string str) => Decrypt(str, "MiracleSoft");
+
             /// <summary> 
             /// 解密数据 
             /// </summary> 
-            /// <param name="Text"></param> 
+            /// <param name="str"></param> 
             /// <param name="key"></param> 
             /// <returns></returns> 
             public static string Decrypt(string str, string key)
             {
-                DESCryptoServiceProvider des = new DESCryptoServiceProvider
+                var des = new DESCryptoServiceProvider
                 {
                     Key = Encoding.ASCII.GetBytes(GetMD5(key)),
                     IV = Encoding.ASCII.GetBytes(GetMD5(key))
                 };
-                int len = str.Length / 2;
-                byte[] inputByteArray = new byte[len];
-                for (int i = 0; i < len; i++)
+                var len = str.Length / 2;
+                var inputByteArray = new byte[len];
+                for (var i = 0; i < len; i++)
+                    inputByteArray[i] = (byte) Convert.ToInt32(str.Substring(i * 2, 2), 16);
+                using (var ms = new MemoryStream())
                 {
-                    inputByteArray[i] = (byte)Convert.ToInt32(str.Substring(i * 2, 2), 16);
+                    using (var cs = new CryptoStream(ms, des.CreateDecryptor(), CryptoStreamMode.Write))
+                    {
+                        cs.Write(inputByteArray, 0, inputByteArray.Length);
+                        cs.FlushFinalBlock();
+                        return Encoding.Default.GetString(ms.ToArray());
+                    }
                 }
-                MemoryStream ms = new MemoryStream();
-                CryptoStream cs = new CryptoStream(ms, des.CreateDecryptor(), CryptoStreamMode.Write);
-                cs.Write(inputByteArray, 0, inputByteArray.Length);
-                cs.FlushFinalBlock();
-                return Encoding.Default.GetString(ms.ToArray());
             }
+
             #endregion
 
             #region MD5
+
             /// <summary>
             /// 获取MD5字符串
             /// </summary>
@@ -96,17 +101,18 @@ namespace YuWan
             private static string GetMD5(string str)
             {
                 MD5 md5 = new MD5CryptoServiceProvider();
+
                 #region ///MD5CryptoServiceProvider  类MSDN详解
+
                 //https://msdn.microsoft.com/zh-cn/library/system.security.cryptography.md5cryptoserviceprovider(v=vs.110).aspx
+
                 #endregion
-                byte[] md5char = md5.ComputeHash(Encoding.Unicode.GetBytes(str));
-                string result = null;
-                for (int i = 0; i < md5char.Length; i++)
-                {
-                    result += md5char[i].ToString("x2");
-                }
+
+                var md5char = md5.ComputeHash(Encoding.Unicode.GetBytes(str));
+                var result = md5char.Aggregate<byte, string>(null, (current, t) => current + t.ToString("x2"));
                 return result.ToUpper();
             }
+
             #endregion
         }
     }
