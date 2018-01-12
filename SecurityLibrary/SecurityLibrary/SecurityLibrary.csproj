@@ -7,8 +7,8 @@
     <ProjectGuid>{0A4D099C-E2A7-4531-8109-34AE0BD07E36}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>YuWan.SecurityLibrary</RootNamespace>
-    <AssemblyName>SecurityLibrary</AssemblyName>
+    <RootNamespace>Miraclesoft.SecurityLibrary</RootNamespace>
+    <AssemblyName>Miraclesoft.SecurityLibrary</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
